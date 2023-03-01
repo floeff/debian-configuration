@@ -1,0 +1,138 @@
+### temporary file - work in progress
+### do not use on production systems
+
+myhostname = mx.yourdomain.tld
+mydestination = $myhostname, localhost.$mydomain, localhost, mailserver.yourdomain.tld
+
+alias_maps = hash:/etc/aliases
+compatibility_level = 2
+smtputf8_enable = no
+tls_ssl_options = NO_COMPRESSION
+tls_high_cipherlist = EECDH+AESGCM:EDH+AESGCM
+smtp_tls_security_level = dane
+smtp_dns_support_level = dnssec
+smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
+smtp_tls_loglevel = 1
+smtp_tls_note_starttls_offer = yes
+smtp_tls_fingerprint_digest = sha256
+
+smtpd_tls_security_level = may
+smtpd_tls_auth_only = yes
+smtpd_tls_cert_file = /etc/ssl/certs/mailserver.yourdomain.tld.chain.pem
+smtpd_tls_key_file = /etc/ssl/private/mailserver.yourdomain.tld.key.pem
+smtpd_tls_eccert_file = /etc/ssl/certs/mailserver.yourdomain.tld.ecc.chain.pem
+smtpd_tls_eckey_file = /etc/ssl/private/mailserver.yourdomain.tld.ecc.key.pem
+smtpd_tls_dh1024_param_file = /etc/ssl/dhparams.pem
+smtpd_use_tls = yes
+smtpd_tls_loglevel = 1
+smtpd_tls_received_header = yes
+smtpd_tls_fingerprint_digest = sha256
+smtpd_sasl_security_options = noanonymous, noplaintext
+smtpd_sasl_tls_security_options = noanonymous
+
+smtpd_milters = inet:localhost:11332
+non_smtpd_milters = inet:localhost:11332
+milter_protocol = 6
+milter_mail_macros = i {mail_addr} {client_addr} {client_name} {auth_authen}
+milter_default_action = tempfail
+
+smtpd_helo_required = yes
+disable_vrfy_command = yes
+smtpd_recipient_limit = 250
+strict_rfc821_envelopes = yes
+smtpd_reject_unlisted_sender = yes
+smtpd_discard_ehlo_keywords = silent-discard, dsn
+show_user_unknown_table_name = no
+smtpd_sasl_authenticated_header = yes
+
+smtpd_client_restrictions = permit_mynetworks
+                            reject_unknown_client_hostname
+                            permit_dnswl_client list.dnswl.org=127.0.[0..255].[1..3]
+
+smtpd_helo_restrictions = permit_mynetworks
+                          reject_invalid_helo_hostname
+                          reject_non_fqdn_helo_hostname
+                          reject_unknown_helo_hostname
+
+smtpd_sender_restrictions = reject_non_fqdn_sender
+                            reject_unknown_sender_domain
+                            reject_unlisted_sender
+
+smtpd_relay_restrictions = reject_non_fqdn_recipient
+                           reject_unknown_recipient_domain
+                           permit_mynetworks
+                           reject_unauth_destination
+                           reject_unlisted_recipient
+
+#smtpd_recipient_restrictions = check_policy_service unix:private/quota-status
+
+smtpd_data_restrictions = reject_unauth_pipelining
+
+smtpd_end_of_data_restrictions =
+
+smtpd_etrn_restrictions = reject_plaintext_session
+                          reject
+
+mua_client_restrictions = permit_sasl_authenticated
+                          reject
+
+mua_helo_restrictions =
+
+mua_sender_restrictions = reject_non_fqdn_sender
+                          reject_unknown_sender_domain
+                          reject_sender_login_mismatch
+                          reject_unlisted_sender
+
+mua_relay_restrictions = reject_non_fqdn_recipient
+                         reject_unknown_recipient_domain
+                         reject_unlisted_recipient
+                         permit_sasl_authenticated
+                         reject
+
+mua_recipient_restrictions = 
+
+mua_data_restrictions = reject_unauth_pipelining
+
+mua_end_of_data_restrictions =
+
+mua_etrn_restrictions = reject_plaintext_session
+                        reject
+
+mailbox_transport = lmtp:unix:private/dovecot-lmtp
+virtual_alias_maps = hash:/etc/postfix/virtual
+
+mynetworks_style = host
+mailbox_size_limit = 0
+message_size_limit = 52428800
+biff = no
+append_dot_mydomain = no
+recipient_delimiter = +
+delay_warning_time = 4h
+authorized_flush_users = root
+authorized_mailq_users = root
+enable_long_queue_ids = yes
+
+postscreen_blacklist_action = drop
+postscreen_dnsbl_threshold = 8
+postscreen_dnsbl_sites = zen.spamhaus.org=127.0.0.[10;11]*8
+                         zen.spamhaus.org=127.0.0.[4..7]*6
+                         zen.spamhaus.org=127.0.0.3*4
+                         zen.spamhaus.org=127.0.0.2*3
+                         b.barracudacentral.org=127.0.0.2*7
+                         bl.mailspike.net=127.0.0.2*5
+                         bl.mailspike.net=127.0.0.[10..12]*4
+                         wl.mailspike.net=127.0.0.[18..20]*-2
+                         bl.spameatingmonkey.net=127.0.0.2*4
+                         bl.spamcop.net=127.0.0.2*2
+                         dnsbl.sorbs.net=127.0.0.10*8
+                         dnsbl.sorbs.net=127.0.0.5*6
+                         dnsbl.sorbs.net=127.0.0.7*3
+                         dnsbl.sorbs.net=127.0.0.8*2
+                         dnsbl.sorbs.net=127.0.0.6*2
+                         dnsbl.sorbs.net=127.0.0.9*2
+                         list.dnswl.org=127.0.[0..255].0*-2
+                         list.dnswl.org=127.0.[0..255].1*-3
+                         list.dnswl.org=127.0.[0..255].[2..3]*-4
+postscreen_dnsbl_whitelist_threshold = -1
+postscreen_dnsbl_action = enforce
+postscreen_greet_action = enforce
